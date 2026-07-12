@@ -17,23 +17,27 @@ pipeline {
         }
 
         stage('Push to Registry') {
-    steps {
-        echo 'Subiendo imagen a Docker Hub...'
+            steps {
+                echo 'Subiendo imagen a Docker Hub...'
 
-        withCredentials([usernamePassword(
-            credentialsId: 'dockerhub-credentials',
-            usernameVariable: 'DOCKER_USER',
-            passwordVariable: 'DOCKER_PASS'
-        )]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
 
-            bat '''
-            docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-            docker tag mi-app:latest %DOCKER_USER%/mi-app:latest
-            docker push %DOCKER_USER%/mi-app:latest
-            '''
+                    bat '''
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+
+                    docker tag mi-app:latest %DOCKER_USER%/mi-app:latest
+                    docker tag mi-app:latest %DOCKER_USER%/mi-app:build-%BUILD_NUMBER%
+
+                    docker push %DOCKER_USER%/mi-app:latest
+                    docker push %DOCKER_USER%/mi-app:build-%BUILD_NUMBER%
+                    '''
+                }
+            }
         }
-    }
-}
 
         stage('Verificar imagen') {
             steps {
